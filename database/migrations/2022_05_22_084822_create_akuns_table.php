@@ -15,7 +15,7 @@ class CreateAkunsTable extends Migration
     {
         Schema::create('akuns', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_perusahaan');
             $table->string('komponen');
             $table->unsignedBigInteger('id_struktur_akun');
             $table->unsignedBigInteger('id_struktur_akun_detail');
@@ -24,7 +24,7 @@ class CreateAkunsTable extends Migration
             $table->string('no');
             $table->string('nama');
             $table->timestamps();
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
             $table->foreign('id_struktur_akun')->references('id')->on('struktur_akuns');
             $table->foreign('id_struktur_akun_detail')->references('id')->on('struktur_akun_details');
         });

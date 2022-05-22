@@ -15,20 +15,28 @@ class CreateJurnalsTable extends Migration
     {
         Schema::create('jurnals', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_perusahaan');
+            $table->unsignedBigInteger('id_user_create');
+            $table->unsignedBigInteger('id_user_update')->nullable();
+            $table->unsignedBigInteger('id_user_tutupbuku')->nullable();
+            $table->unsignedBigInteger('id_user_batal')->nullable();
             $table->string('no');
             $table->date('tanggal');
-            $table->string('catatan');
+            $table->string('catatan')->nullable();
             $table->unsignedBigInteger('id_proyek');
             $table->decimal('debit');
             $table->decimal('kredit');
             $table->boolean('tutupbuku');
             $table->boolean('batal');
-            $table->string('batalketerangan');
+            $table->string('batalketerangan')->nullable();
             $table->unsignedBigInteger('id_tutupbuku');
             $table->timestamps();
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
             $table->foreign('id_proyek')->references('id')->on('proyeks');
+            $table->foreign('id_user_create')->references('id')->on('users');
+            $table->foreign('id_user_update')->references('id')->on('users');
+            $table->foreign('id_user_tutupbuku')->references('id')->on('users');
+            $table->foreign('id_user_batal')->references('id')->on('users');
         });
     }
 

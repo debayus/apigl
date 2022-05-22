@@ -15,11 +15,15 @@ class CreateSaldoAwalsTable extends Migration
     {
         Schema::create('saldo_awals', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_perusahaan');
+            $table->unsignedBigInteger('id_user_create');
+            $table->unsignedBigInteger('id_user_update')->nullable();
             $table->date('tanggal');
-            $table->string('catatan');
+            $table->string('catatan')->nullable();
             $table->timestamps();
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
+            $table->foreign('id_user_create')->references('id')->on('users');
+            $table->foreign('id_user_update')->references('id')->on('users');
         });
     }
 

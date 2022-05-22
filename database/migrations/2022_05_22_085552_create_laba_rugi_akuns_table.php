@@ -15,11 +15,11 @@ class CreateLabaRugiAkunsTable extends Migration
     {
         Schema::create('laba_rugi_akuns', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_perusahaan');
             $table->unsignedBigInteger('id_akun');
             $table->string('tipe');
             $table->timestamps();
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
             $table->foreign('id_akun')->references('id')->on('akuns');
         });
     }

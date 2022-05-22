@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class StrukturAkunDetail extends Model
 {
     use HasFactory;
-    protected $table = 'struktur_akun_details';
-    protected $fillable = [
-        'id',
-        'id_struktur_akun',
-        'nama',
-        'cash',
-        'bank'
-    ];
+    // protected $table = 'struktur_akun_details';
+    // protected $fillable = [
+    //     'id',
+    //     'id_struktur_akun',
+    //     'nama',
+    //     'cash',
+    //     'bank'
+    // ];
 }

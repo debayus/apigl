@@ -15,16 +15,16 @@ class CreateKontaksTable extends Migration
     {
         Schema::create('kontaks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_perusahaan');
             $table->string('nama');
-            $table->string('telp');
-            $table->string('whatsapp');
-            $table->string('email');
-            $table->string('perusahaan');
-            $table->string('alamat');
-            $table->string('catatan');
+            $table->string('telp')->nullable();
+            $table->string('whatsapp')->nullable();
+            $table->string('email')->nullable();
+            $table->string('perusahaan')->nullable();
+            $table->string('alamat')->nullable();
+            $table->string('catatan')->nullable();
             $table->timestamps();
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
         });
     }
 

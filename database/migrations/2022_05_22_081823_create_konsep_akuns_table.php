@@ -15,11 +15,11 @@ class CreateKonsepAkunsTable extends Migration
     {
         Schema::create('konsep_akuns', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_perusahaan');
             $table->integer('levelmax');
             $table->integer('digitmax');
             $table->timestamps();
-            $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
         });
     }
 
