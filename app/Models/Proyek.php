@@ -8,10 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Proyek extends Model
 {
     use HasFactory;
-    // protected $table = 'proyeks';
-    // protected $fillable = [
-    //     'id',
-    //     'id_user',
-    //     'nama'
-    // ];
+
+    protected $hidden = [
+        'id_perusahaan',
+    ];
 }

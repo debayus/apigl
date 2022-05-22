@@ -8,11 +8,4 @@ use Illuminate\Database\Eloquent\Model;
 class StrukturAkun extends Model
 {
     use HasFactory;
-    // protected $table = 'struktur_akuns';
-    // protected $fillable = [
-    //     'id',
-    //     'id_user',
-    //     'nama',
-    //     'keterangan'
-    // ];
 }

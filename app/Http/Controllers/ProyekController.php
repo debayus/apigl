@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Helper;
+use App\Models\Perusahaan;
 use App\Models\Proyek;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProyekController extends Controller
@@ -10,21 +13,28 @@ class ProyekController extends Controller
     public function index()
     {
         $userId = auth()->user()->id;
-        $models = Proyek::where('id_user', '=', $userId)->simplePaginate(15);
-        return response()->json($models);
+        $user = User::find($userId);
+        if ($user == null) { return Helper::responseErrorNoUser(); }
+        $perusahaan = Perusahaan::find($user->id_perusahaan);
+        if ($perusahaan == null) return Helper::responseErrorNoPerusahaan();
+
+        $models = Proyek::where('id_perusahaan', '=', $perusahaan->id)->simplePaginate(15);
+        return Helper::responseSuccess($models);
     }
 
     public function store(Request $request)
     {
         $userId = auth()->user()->id;
+        $user = User::find($userId);
+        if ($user == null) { return Helper::responseErrorNoUser(); }
+        $perusahaan = Perusahaan::find($user->id_perusahaan);
+        if ($perusahaan == null) return Helper::responseErrorNoPerusahaan();
 
         $model = new Proyek;
-        $model->id_user = $userId;
+        $model->id_perusahaan = $perusahaan->id;
         $model->nama = $request->nama;
         $model->save();
-        return response()->json([
-            "message" => "Added."
-        ], 201);
+        return Helper::responseSuccess($model);
     }
 
     public function show($id)
