@@ -4,6 +4,10 @@ namespace App\Models;
 
 class Helper
 {
+    public static function responseErrorNotFound() {
+        return Helper::responseError('Data tidak ditemukan');
+    }
+
     public static function responseErrorNoPerusahaan() {
         return Helper::responseError('Perusahaan tidak ditemukan');
     }

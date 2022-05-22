@@ -10,15 +10,19 @@ use Illuminate\Http\Request;
 
 class ProyekController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $userId = auth()->user()->id;
         $user = User::find($userId);
-        if ($user == null) { return Helper::responseErrorNoUser(); }
+        if (empty($user)) { return Helper::responseErrorNoUser(); }
         $perusahaan = Perusahaan::find($user->id_perusahaan);
-        if ($perusahaan == null) return Helper::responseErrorNoPerusahaan();
+        if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $models = Proyek::where('id_perusahaan', '=', $perusahaan->id)->simplePaginate(15);
+        $query = Proyek::where('id_perusahaan', '=', $perusahaan->id);
+        if ($request->filter){
+            $query = $query->where('nama', 'like', '%'.$request->filter.'%');
+        }
+        $models = $query->simplePaginate(15);
         return Helper::responseSuccess($models);
     }
 
@@ -26,9 +30,9 @@ class ProyekController extends Controller
     {
         $userId = auth()->user()->id;
         $user = User::find($userId);
-        if ($user == null) { return Helper::responseErrorNoUser(); }
+        if (empty($user)) { return Helper::responseErrorNoUser(); }
         $perusahaan = Perusahaan::find($user->id_perusahaan);
-        if ($perusahaan == null) return Helper::responseErrorNoPerusahaan();
+        if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
         $model = new Proyek;
         $model->id_perusahaan = $perusahaan->id;
@@ -40,53 +44,47 @@ class ProyekController extends Controller
     public function show($id)
     {
         $userId = auth()->user()->id;
+        $user = User::find($userId);
+        if (empty($user)) { return Helper::responseErrorNoUser(); }
+        $perusahaan = Perusahaan::find($user->id_perusahaan);
+        if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = Proyek::where('id_user', '=', $userId)->find($id);
-        if(!empty($model))
-        {
-            return response()->json($model);
-        }
-        else
-        {
-            return response()->json([
-                "message" => "not found"
-            ], 404);
-        }
+        $model = Proyek::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+        if (empty($model)) return Helper::responseErrorNotFound();
+
+        return Helper::responseSuccess($model);
     }
 
     public function update(Request $request, $id)
     {
         $userId = auth()->user()->id;
+        $user = User::find($userId);
+        if (empty($user)) { return Helper::responseErrorNoUser(); }
+        $perusahaan = Perusahaan::find($user->id_perusahaan);
+        if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = Proyek::where('id_user', '=', $userId)->find($id);
-        if ($model->exists()) {
-            $model->nama = is_null($request->nama) ? $model->nama : $request->nama;
-            $model->save();
-            return response()->json([
-                "message" => "Updated."
-            ], 404);
-        }else{
-            return response()->json([
-                "message" => "Not Found."
-            ], 404);
-        }
+        $model = Proyek::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+        if (empty($model)) return Helper::responseErrorNotFound();
+
+        $model->nama = $request->nama;
+        $model->save();
+
+        return Helper::responseSuccess($model);
     }
 
     public function destroy($id)
     {
         $userId = auth()->user()->id;
+        $user = User::find($userId);
+        if (empty($user)) { return Helper::responseErrorNoUser(); }
+        $perusahaan = Perusahaan::find($user->id_perusahaan);
+        if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = Proyek::where('id_user', '=', $userId)->find($id);
-        if($model->exists()) {
-            $model->delete();
+        $model = Proyek::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+        if (empty($model)) return Helper::responseErrorNotFound();
 
-            return response()->json([
-              "message" => "deleted."
-            ], 202);
-        } else {
-            return response()->json([
-              "message" => "not found."
-            ], 404);
-        }
+        $model->delete();
+
+        return Helper::responseSuccess();
     }
 }

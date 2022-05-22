@@ -14,10 +14,10 @@ class PerusahaanController extends Controller
     {
         $userId = auth()->user()->id;
         $user = User::find($userId);
-        if ($user == null) { return Helper::responseErrorNoUser(); }
+        if (empty($user)) { return Helper::responseErrorNoUser(); }
 
         // check user
-        if ($user->id_perusahaan != null) { return Helper::responseError('User sudah terdaftar'); }
+        if (!is_null($user->id_perusahaan)) { return Helper::responseError('User sudah terdaftar'); }
 
         DB::beginTransaction();
         try {
