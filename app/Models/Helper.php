@@ -18,16 +18,19 @@ class Helper
 
     public static function responseError($message) {
         return response()->json([
-            'success' => false,
             'message' => $message,
+        ], 501);
+    }
+
+    public static function responseList($data, $totalRowCount) {
+        return response()->json([
+            'data' => $data,
+            'totalRowCount' => $totalRowCount
         ]);
     }
 
     public static function responseSuccess($data = null) {
-        return response()->json([
-            'success' => true,
-            'data' => $data,
-        ]);
+        return response()->json($data);
     }
 
     public static function generateRandomString($length = 10) {
@@ -38,6 +41,15 @@ class Helper
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    public static function findObjectById($array, $id, $key = 'id'){
+        foreach ($array as $element) {
+            if ($id == $element[$key]) {
+                return $element;
+            }
+        }
+        return null;
     }
 
 }

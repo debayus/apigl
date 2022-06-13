@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateKonsepAkunDetailsTable extends Migration
 {
-    protected $primaryKey = ['level', 'id_konsep_akun'];
-    public $incrementing = false;
+    // protected $primaryKey = ['level', 'id_konsep_akun'];
+    // public $incrementing = false;
 
     /**
      * Run the migrations.
@@ -21,6 +21,8 @@ class CreateKonsepAkunDetailsTable extends Migration
             $table->unsignedBigInteger('id_konsep_akun');
             $table->integer('jumlahdigit');
             $table->timestamps();
+
+            $table->primary(array('level', 'id_konsep_akun'));
             $table->foreign('id_konsep_akun')->references('id')->on('konsep_akuns');
         });
     }

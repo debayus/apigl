@@ -2,81 +2,178 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Helper;
+use App\Models\Perusahaan;
 use App\Models\StrukturAkun;
+use App\Models\StrukturAkunDetail;
+use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StrukturAkunController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $userId = auth()->user()->id;
-        $models = StrukturAkun::where('id_user', '=', $userId)->simplePaginate(15);
-        return response()->json($models);
+        $user = User::find($userId);
+        if (empty($user)) { return Helper::responseErrorNoUser(); }
+        $perusahaan = Perusahaan::find($user->id_perusahaan);
+        if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+
+        $query = StrukturAkun::where('id_perusahaan', '=', $perusahaan->id);
+        if ($request->filter){
+            $query = $query->where('nama', 'like', '%'.$request->filter.'%');
+        }
+        $models = $query->simplePaginate(15);
+        $totalRowCount = $query->count();
+        return Helper::responseList($models, $totalRowCount);
     }
 
     public function store(Request $request)
     {
-        $userId = auth()->user()->id;
+        try{
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = new StrukturAkun;
-        $model->id_user = $userId;
-        $model->nama = $request->nama;
-        $model->save();
-        return response()->json([
-            "message" => "Added."
-        ], 201);
+            DB::beginTransaction();
+            $model = new StrukturAkun;
+            $model->id_perusahaan = $perusahaan->id;
+            $model->nama = $request->nama;
+            $model->jenis = $request->jenis;
+            $model->keterangan = $request->keterangan;
+            $model->save();
+
+            // insert
+            for ($i = 0; $i < count($request->detail); $i++) {
+                $item = $request->detail[$i];
+                $detail = new StrukturAkunDetail;
+                $detail->id_struktur_akun = $model->id;
+                $detail->nama = $item['nama'];
+                $detail->cash = $item['cash'];
+                $detail->bank = $item['bank'];
+                $detail->save();
+            }
+            DB::commit();
+        } catch (Exception $ex){
+            DB::rollback();
+            return Helper::responseError($ex->getMessage());
+        }
+        return Helper::responseSuccess($model);
     }
 
     public function show($id)
     {
-        $userId = auth()->user()->id;
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = StrukturAkun::where('id_user', '=', $userId)->find($id);
-        if(!empty($model))
-        {
-            return response()->json($model);
-        }
-        else
-        {
-            return response()->json([
-                "message" => "not found"
-            ], 404);
+            $model = StrukturAkun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            $detail = StrukturAkunDetail::where('id_struktur_akun', '=', $model->id)->get();
+            $model['detail'] = $detail;
+
+            return Helper::responseSuccess($model);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
         }
     }
 
     public function update(Request $request, $id)
     {
-        $userId = auth()->user()->id;
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = StrukturAkun::where('id_user', '=', $userId)->find($id);
-        if ($model->exists()) {
-            $model->nama = is_null($request->nama) ? $model->nama : $request->nama;
+            $model = StrukturAkun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            $detail = StrukturAkunDetail::where('id_struktur_akun', '=', $model->id)->get();
+
+            DB::beginTransaction();
+
+            $model->nama = $request->nama;
+            $model->jenis = $request->jenis;
+            $model->keterangan = $request->keterangan;
             $model->save();
-            return response()->json([
-                "message" => "Updated."
-            ], 404);
-        }else{
-            return response()->json([
-                "message" => "Not Found."
-            ], 404);
+
+            // delete detail
+            for ($i = 0; $i < count($detail); $i++) {
+                $has = Helper::findObjectById($request->detail, $detail[$i]->id);
+                if (!$has){
+                    StrukturAkunDetail::where('id_struktur_akun', '=', $model->id)->find($detail[$i]->id)->delete();
+                }
+            }
+
+            for ($i = 0; $i < count($request->detail); $i++) {
+                $item = $request->detail[$i];
+                $has = Helper::findObjectById($detail, $item['id']);
+
+                if (!$has){
+
+                    // add detail
+                    $DbItem = new StrukturAkunDetail;
+                    $DbItem->id_struktur_akun = $model->id;
+                    $DbItem->nama = $item['nama'];
+                    $DbItem->cash = $item['cash'];
+                    $DbItem->bank = $item['bank'];
+                    $DbItem->save();
+
+                }else{
+
+                    // update detail
+                    $DbItem = StrukturAkunDetail::where('id_struktur_akun', '=', $model->id)->find($has->id);
+                    $DbItem->nama = $item['nama'];
+                    $DbItem->cash = $item['cash'];
+                    $DbItem->bank = $item['bank'];
+                    $DbItem->save();
+
+                }
+            }
+
+            DB::commit();
+            return Helper::responseSuccess($model);
+        } catch (Exception $ex){
+            DB::rollBack();
+            return Helper::responseError($ex->getMessage());
         }
     }
 
     public function destroy($id)
     {
-        $userId = auth()->user()->id;
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = StrukturAkun::where('id_user', '=', $userId)->find($id);
-        if($model->exists()) {
+            $model = StrukturAkun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            $detail = StrukturAkunDetail::where('id_struktur_akun', '=', $model->id);
+
+            DB::beginTransaction();
+
+            $detail->delete();
             $model->delete();
 
-            return response()->json([
-              "message" => "deleted."
-            ], 202);
-        } else {
-            return response()->json([
-              "message" => "not found."
-            ], 404);
+            DB::commit();
+            return Helper::responseSuccess();
+        } catch (Exception $ex){
+            DB::rollBack();
+            return Helper::responseError($ex->getMessage());
         }
     }
 }

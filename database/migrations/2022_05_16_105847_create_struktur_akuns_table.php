@@ -17,6 +17,7 @@ class CreateStrukturAkunsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('id_perusahaan');
             $table->string('nama');
+            $table->string('jenis');
             $table->string('keterangan')->nullable();;
             $table->timestamps();
             $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
