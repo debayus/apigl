@@ -24,8 +24,8 @@ class KonsepAkunController extends Controller
             if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
             $query = KonsepAkun::where('id_perusahaan', '=', $perusahaan->id);
-            $models = $query->simplePaginate(15);
             $totalRowCount = $query->count();
+            $models = $query->simplePaginate(30);
             return Helper::responseList($models, $totalRowCount);
         } catch (Exception $ex){
             return Helper::responseError($ex->getMessage());

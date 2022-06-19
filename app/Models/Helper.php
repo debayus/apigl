@@ -52,4 +52,21 @@ class Helper
         return null;
     }
 
+    public static function findObject($array, $params){
+        foreach ($array as $element) {
+            $g = true;
+            foreach (array_keys($params) as $key){
+                if ($g){
+                    if ($params[$key] != $element[$key]){
+                        $g = false;
+                    }
+                }
+            }
+            if ($g) {
+                return $element;
+            }
+        }
+        return null;
+    }
+
 }

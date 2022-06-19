@@ -24,8 +24,8 @@ class ProyekController extends Controller
             if ($request->filter){
                 $query = $query->where('nama', 'like', '%'.$request->filter.'%');
             }
-            $models = $query->simplePaginate(15);
             $totalRowCount = $query->count();
+            $models = $query->simplePaginate(30);
             return Helper::responseList($models, $totalRowCount);
         } catch (Exception $ex){
             return Helper::responseError($ex->getMessage());

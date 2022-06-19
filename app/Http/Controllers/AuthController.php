@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Helper;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,14 +21,14 @@ class AuthController extends Controller
         ]);
 
         if($validator->fails()){
-            return response()->json($validator->errors());
+            return Helper::responseError($validator->errors());
         }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password)
-         ]);
+            ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

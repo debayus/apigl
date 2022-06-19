@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Akun;
 use App\Models\Helper;
 use App\Models\KonsepAkun;
 use App\Models\KonsepAkunDetail;
@@ -20,7 +21,6 @@ class PerusahaanController extends Controller
     public function store(Request $request)
     {
         try {
-
             $userId = auth()->user()->id;
             $user = User::find($userId);
             if (empty($user)) { return Helper::responseErrorNoUser(); }
@@ -53,6 +53,8 @@ class PerusahaanController extends Controller
             $proyek->save();
 
             // struktur akun
+            $strukturAkuns = [];
+            $strukturAkunDetails = [];
             for($i = 0; $i < count(SetupAwal::$struktur_akun); $i++){
                 $x = SetupAwal::$struktur_akun[$i];
                 $strukturAkun = new StrukturAkun;
@@ -60,6 +62,7 @@ class PerusahaanController extends Controller
                 $strukturAkun->nama = $x['nama'];
                 $strukturAkun->jenis = $x['jenis'];
                 $strukturAkun->save();
+
                 for ($j = 0; $j < count($x['detail']); $j++) {
                     $y = $x['detail'][$j];
                     $strukturAkunDetail = new StrukturAkunDetail;
@@ -68,7 +71,9 @@ class PerusahaanController extends Controller
                     $strukturAkunDetail->cash = $y['cash'];
                     $strukturAkunDetail->bank = $y['bank'];
                     $strukturAkunDetail->save();
+                    array_push($strukturAkunDetails, $strukturAkunDetail);
                 }
+                array_push($strukturAkuns, $strukturAkun);
             }
 
             // konsep akun
@@ -87,7 +92,30 @@ class PerusahaanController extends Controller
             }
 
             // akun
-
+            for($i = 0; $i < count(SetupAwal::$akun); $i++){
+                $x = SetupAwal::$akun[$i];
+                $strukturAkun = Helper::findObjectById($strukturAkuns, $x['id_struktur_akun'], 'nama');
+                if ($strukturAkun == null){
+                    throw new Exception($x['id_struktur_akun'].' tidak ditemukan');
+                }
+                $strukturAkunDetail = Helper::findObject($strukturAkunDetails,[
+                    'id_struktur_akun' => $strukturAkun->id,
+                    'nama' => $x['id_struktur_akun_detail']
+                ]);
+                if ($x['id_struktur_akun_detail'] != null && $strukturAkunDetail == null){
+                    throw new Exception($x['id_struktur_akun_detail'].' tidak ditemukan');
+                }
+                $akun = new Akun;
+                $akun->id_perusahaan = $model->id;
+                $akun->komponen = $x['komponen'];
+                $akun->id_struktur_akun = $strukturAkun == null ? null : $strukturAkun['id'];
+                $akun->id_struktur_akun_detail = $strukturAkunDetail == null ? null : $strukturAkunDetail['id'];
+                $akun->normalpos = $x['normalpos'];
+                $akun->level = $x['level'];
+                $akun->no = $x['no'];
+                $akun->nama = $x['nama'];
+                $akun->save();
+            }
 
             // laba rugi akun
 

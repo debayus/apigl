@@ -18,7 +18,7 @@ class CreateAkunsTable extends Migration
             $table->unsignedBigInteger('id_perusahaan');
             $table->string('komponen');
             $table->unsignedBigInteger('id_struktur_akun');
-            $table->unsignedBigInteger('id_struktur_akun_detail');
+            $table->unsignedBigInteger('id_struktur_akun_detail')->nullable();
             $table->string('normalpos');
             $table->integer('level');
             $table->string('no');

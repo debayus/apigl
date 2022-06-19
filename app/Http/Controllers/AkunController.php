@@ -18,7 +18,8 @@ class AkunController extends Controller
     public function index(Request $request)
     {
         try {
-            $userId = auth()->user()->id;
+            // $userId = auth()->user()->id;
+            $userId = 2;
             $user = User::find($userId);
             if (empty($user)) { return Helper::responseErrorNoUser(); }
             $perusahaan = Perusahaan::find($user->id_perusahaan);
@@ -33,8 +34,8 @@ class AkunController extends Controller
                         ->orWhere('no', 'like', '%'.$filter.'%');
                 });
             }
-            $models = $query->simplePaginate(15);
             $totalRowCount = $query->count();
+            $models = $query->simplePaginate(30);
             return Helper::responseList($models, $totalRowCount);
         } catch (Exception $ex){
             return Helper::responseError($ex->getMessage());
