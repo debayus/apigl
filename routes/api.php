@@ -29,6 +29,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Route::get('/test',[AkunController::class, 'master']);
+
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/profile', function(Request $request) {
         return auth()->user();
@@ -69,6 +71,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/konsepAkun',[KonsepAkunController::class, 'store']);
     Route::put('/konsepAkun/{id}',[KonsepAkunController::class, 'update']);
     Route::delete('/konsepAkun/{id}',[KonsepAkunController::class, 'destroy']);
+
+    Route::get('/akun',[AkunController::class, 'index']);
+    Route::get('/akun/{id}',[AkunController::class, 'show']);
+    Route::post('/akun',[AkunController::class, 'store']);
+    Route::put('/akun/{id}',[AkunController::class, 'update']);
+    Route::delete('/akun/{id}',[AkunController::class, 'destroy']);
+    Route::get('/akunMaster',[AkunController::class, 'master']);
 });
 
 

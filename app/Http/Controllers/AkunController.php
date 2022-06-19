@@ -3,80 +3,166 @@
 namespace App\Http\Controllers;
 
 use App\Models\Akun;
+use App\Models\Helper;
+use App\Models\KonsepAkun;
+use App\Models\KonsepAkunDetail;
+use App\Models\Perusahaan;
+use App\Models\StrukturAkun;
+use App\Models\StrukturAkunDetail;
+use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 
 class AkunController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $userId = auth()->user()->id;
-        $models = Akun::where('id_user', '=', $userId)->simplePaginate(15);
-        return response()->json($models);
-    }
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-    public function store(Request $request)
-    {
-        $userId = auth()->user()->id;
-
-        $model = new Akun;
-        $model->id_user = $userId;
-        $model->nama = $request->nama;
-        $model->save();
-        return response()->json([
-            "message" => "Added."
-        ], 201);
+            $query = Akun::where('id_perusahaan', '=', $perusahaan->id);
+            $filter = $request->filter;
+            if ($filter){
+                $query = $query->where(function ($query) use ($filter) {
+                    return $query
+                        ->where('nama', 'like', '%'.$filter.'%')
+                        ->orWhere('no', 'like', '%'.$filter.'%');
+                });
+            }
+            $models = $query->simplePaginate(15);
+            $totalRowCount = $query->count();
+            return Helper::responseList($models, $totalRowCount);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
     }
 
     public function show($id)
     {
-        $userId = auth()->user()->id;
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = Akun::where('id_user', '=', $userId)->find($id);
-        if(!empty($model))
-        {
-            return response()->json($model);
+            $model = Akun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            return Helper::responseSuccess($model);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
         }
-        else
-        {
-            return response()->json([
-                "message" => "not found"
-            ], 404);
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+
+            $model = new Akun;
+            $model->id_perusahaan = $perusahaan->id;
+            $model->komponen = $request->komponen;
+            $model->id_struktur_akun = $request->id_struktur_akun;
+            $model->id_struktur_akun_detail = $request->id_struktur_akun_detail;
+            $model->normalpos = $request->normalpos;
+            $model->level = $request->level;
+            $model->no = $request->no;
+            $model->nama = $request->nama;
+            $model->save();
+            return Helper::responseSuccess($model);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
         }
     }
 
     public function update(Request $request, $id)
     {
-        $userId = auth()->user()->id;
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = Akun::where('id_user', '=', $userId)->find($id);
-        if ($model->exists()) {
-            $model->nama = is_null($request->nama) ? $model->nama : $request->nama;
+            $model = Akun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            $model->komponen = $request->komponen;
+            $model->id_struktur_akun = $request->id_struktur_akun;
+            $model->id_struktur_akun_detail = $request->id_struktur_akun_detail;
+            $model->normalpos = $request->normalpos;
+            $model->level = $request->level;
+            $model->no = $request->no;
+            $model->nama = $request->nama;
             $model->save();
-            return response()->json([
-                "message" => "Updated."
-            ], 404);
-        }else{
-            return response()->json([
-                "message" => "Not Found."
-            ], 404);
+
+            return Helper::responseSuccess($model);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
         }
     }
 
     public function destroy($id)
     {
-        $userId = auth()->user()->id;
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-        $model = Akun::where('id_user', '=', $userId)->find($id);
-        if($model->exists()) {
+            $model = Akun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
             $model->delete();
 
-            return response()->json([
-              "message" => "deleted."
-            ], 202);
-        } else {
-            return response()->json([
-              "message" => "not found."
-            ], 404);
+            return Helper::responseSuccess();
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
+    }
+
+    public function master(Request $request)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+
+            // struktur akun
+            $strukturAkun = StrukturAkun::where('id_perusahaan', '=', $perusahaan->id)->get();
+
+            // struktur akun detail
+            $strukturAkunId = [];
+            foreach ($strukturAkun as $element) {
+                array_push($strukturAkunId, $element['id']);
+            }
+            $strukturAkunDetail = StrukturAkunDetail::whereIn('id_struktur_akun', $strukturAkunId)->get();
+
+            // konsep akun
+            $konsepAkun = KonsepAkun::where('id_perusahaan', '=', $perusahaan->id)->first();
+
+            // konsep akun detail
+            $konsepAkunDetail = $konsepAkun == null ? [] :KonsepAkunDetail::where('id_konsep_akun', '=', $konsepAkun['id'])->get();
+
+            return Helper::responseSuccess([
+                'strukturAkun' => $strukturAkun,
+                'strukturAkunDetail' => $strukturAkunDetail,
+                'konsepAkunDetail' => $konsepAkunDetail,
+            ]);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
         }
     }
 }

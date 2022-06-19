@@ -31,6 +31,27 @@ class StrukturAkunController extends Controller
         return Helper::responseList($models, $totalRowCount);
     }
 
+    public function show($id)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+
+            $model = StrukturAkun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            $detail = StrukturAkunDetail::where('id_struktur_akun', '=', $model->id)->get();
+            $model['detail'] = $detail;
+
+            return Helper::responseSuccess($model);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
+    }
+
     public function store(Request $request)
     {
         try{
@@ -64,27 +85,6 @@ class StrukturAkunController extends Controller
             return Helper::responseError($ex->getMessage());
         }
         return Helper::responseSuccess($model);
-    }
-
-    public function show($id)
-    {
-        try {
-            $userId = auth()->user()->id;
-            $user = User::find($userId);
-            if (empty($user)) { return Helper::responseErrorNoUser(); }
-            $perusahaan = Perusahaan::find($user->id_perusahaan);
-            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
-
-            $model = StrukturAkun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
-            if (empty($model)) return Helper::responseErrorNotFound();
-
-            $detail = StrukturAkunDetail::where('id_struktur_akun', '=', $model->id)->get();
-            $model['detail'] = $detail;
-
-            return Helper::responseSuccess($model);
-        } catch (Exception $ex){
-            return Helper::responseError($ex->getMessage());
-        }
     }
 
     public function update(Request $request, $id)

@@ -32,6 +32,24 @@ class ProyekController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+
+            $model = Proyek::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            return Helper::responseSuccess($model);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
+    }
+
     public function store(Request $request)
     {
         try {
@@ -45,24 +63,6 @@ class ProyekController extends Controller
             $model->id_perusahaan = $perusahaan->id;
             $model->nama = $request->nama;
             $model->save();
-            return Helper::responseSuccess($model);
-        } catch (Exception $ex){
-            return Helper::responseError($ex->getMessage());
-        }
-    }
-
-    public function show($id)
-    {
-        try {
-            $userId = auth()->user()->id;
-            $user = User::find($userId);
-            if (empty($user)) { return Helper::responseErrorNoUser(); }
-            $perusahaan = Perusahaan::find($user->id_perusahaan);
-            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
-
-            $model = Proyek::where('id_perusahaan', '=', $perusahaan->id)->find($id);
-            if (empty($model)) return Helper::responseErrorNotFound();
-
             return Helper::responseSuccess($model);
         } catch (Exception $ex){
             return Helper::responseError($ex->getMessage());
