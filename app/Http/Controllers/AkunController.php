@@ -18,8 +18,7 @@ class AkunController extends Controller
     public function index(Request $request)
     {
         try {
-            // $userId = auth()->user()->id;
-            $userId = 2;
+            $userId = auth()->user()->id;
             $user = User::find($userId);
             if (empty($user)) { return Helper::responseErrorNoUser(); }
             $perusahaan = Perusahaan::find($user->id_perusahaan);
@@ -161,6 +160,26 @@ class AkunController extends Controller
                 'strukturAkun' => $strukturAkun,
                 'strukturAkunDetail' => $strukturAkunDetail,
                 'konsepAkunDetail' => $konsepAkunDetail,
+            ]);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
+    }
+
+    public function all(Request $request)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+
+            $query = Akun::where('id_perusahaan', '=', $perusahaan->id);
+            $models = $query->get();
+
+            return Helper::responseSuccess([
+                'akuns' => $models,
             ]);
         } catch (Exception $ex){
             return Helper::responseError($ex->getMessage());
