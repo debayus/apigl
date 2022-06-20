@@ -78,6 +78,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/akun/{id}',[AkunController::class, 'destroy']);
     Route::get('/akunMaster',[AkunController::class, 'master']);
     Route::get('/akunAll',[AkunController::class, 'all']);
+    Route::get('/akunNew/{id}',[AkunController::class, 'new']);
 });
 
 

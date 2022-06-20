@@ -185,4 +185,41 @@ class AkunController extends Controller
             return Helper::responseError($ex->getMessage());
         }
     }
+
+    public function new($id)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+
+            $model = Akun::where('id_perusahaan', '=', $perusahaan->id)->find($id);
+            if (empty($model)) return Helper::responseErrorNotFound();
+
+            // nomor terakhir
+            $nextLevel = $model->level + 1;
+            $latNo = Akun::where([
+                ['id_perusahaan', '=', $perusahaan->id],
+                ['level', '=', $nextLevel],
+                ['no', 'like', $model->no.'%'],
+            ])->orderBy('no', 'DESC')->first();
+
+            // konsep akun
+            $konsepAkun = KonsepAkun::where('id_perusahaan', '=', $perusahaan->id)->first();
+            $konsepAkunDetail = $konsepAkun == null ? null :KonsepAkunDetail::where([
+                ['id_konsep_akun', '=', $konsepAkun['id']],
+                ['level', '=', $nextLevel],
+            ])->first();
+
+            return Helper::responseSuccess([
+                'akun' => $model,
+                'child' => $latNo,
+                'konsepAkun' => $konsepAkunDetail,
+            ]);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
+    }
 }
