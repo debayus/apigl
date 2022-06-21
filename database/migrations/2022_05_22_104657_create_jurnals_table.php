@@ -29,7 +29,7 @@ class CreateJurnalsTable extends Migration
             $table->boolean('tutupbuku');
             $table->boolean('batal');
             $table->string('batalketerangan')->nullable();
-            $table->unsignedBigInteger('id_tutupbuku');
+            $table->unsignedBigInteger('id_tutupbuku')->nullable();
             $table->timestamps();
             $table->foreign('id_perusahaan')->references('id')->on('perusahaans');
             $table->foreign('id_proyek')->references('id')->on('proyeks');

@@ -43,6 +43,16 @@ class Helper
         return $randomString;
     }
 
+    public static function AddChar($value, int $length, string $character) {
+        $strVal = $value;
+        $r = '';
+        for ($i = 0; $i < $length - count($strVal); $i++) {
+            $r += $character;
+        }
+        $r += $strVal;
+        return $r;
+    }
+
     public static function findObjectById($array, $id, $key = 'id'){
         foreach ($array as $element) {
             if ($id == $element[$key]) {
