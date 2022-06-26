@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AkunController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\JurnalController;
 use App\Http\Controllers\KonsepAkunController;
 use App\Http\Controllers\KontakController;
 use App\Http\Controllers\PerusahaanController;
@@ -79,6 +80,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/akunMaster',[AkunController::class, 'master']);
     Route::get('/akunAll',[AkunController::class, 'all']);
     Route::get('/akunNew/{id}',[AkunController::class, 'new']);
+
+    Route::get('/jurnal',[JurnalController::class, 'index']);
+    Route::get('/jurnal/{id}',[JurnalController::class, 'show']);
+    Route::post('/jurnal',[JurnalController::class, 'store']);
+    Route::put('/jurnal/{id}',[JurnalController::class, 'update']);
+    Route::delete('/jurnal/{id}',[JurnalController::class, 'destroy']);
+    Route::get('/jurnalMaster',[JurnalController::class, 'master']);
+    Route::get('/jurnalLookUpAkun',[JurnalController::class, 'lookupAkun']);
 });
 
 

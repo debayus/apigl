@@ -7,6 +7,7 @@ use App\Models\Jurnal;
 use App\Models\Helper;
 use App\Models\JurnalDetail;
 use App\Models\Perusahaan;
+use App\Models\Proyek;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -248,38 +249,50 @@ class JurnalController extends Controller
         }
     }
 
-    // public function master(Request $request)
-    // {
-    //     try {
-    //         $userId = auth()->user()->id;
-    //         $user = User::find($userId);
-    //         if (empty($user)) { return Helper::responseErrorNoUser(); }
-    //         $perusahaan = Perusahaan::find($user->id_perusahaan);
-    //         if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
+    public function master(Request $request)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-    //         // struktur Jurnal
-    //         $strukturJurnal = StrukturJurnal::where('id_perusahaan', '=', $perusahaan->id)->get();
+            // proyek
+            $proyek = Proyek::where('id_perusahaan', '=', $perusahaan->id)->get();
 
-    //         // struktur Jurnal detail
-    //         $strukturJurnalId = [];
-    //         foreach ($strukturJurnal as $element) {
-    //             array_push($strukturJurnalId, $element['id']);
-    //         }
-    //         $strukturJurnalDetail = StrukturJurnalDetail::whereIn('id_struktur_Jurnal', $strukturJurnalId)->get();
+            return Helper::responseSuccess([
+                'proyek' => $proyek
+            ]);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
+    }
 
-    //         // konsep Jurnal
-    //         $konsepJurnal = KonsepJurnal::where('id_perusahaan', '=', $perusahaan->id)->first();
+    public function lookupAkun(Request $request)
+    {
+        try{
+            $userId = auth()->user()->id;
+            $user = User::find($userId);
+            if (empty($user)) { return Helper::responseErrorNoUser(); }
+            $perusahaan = Perusahaan::find($user->id_perusahaan);
+            if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
-    //         // konsep Jurnal detail
-    //         $konsepJurnalDetail = $konsepJurnal == null ? [] :KonsepJurnalDetail::where('id_konsep_Jurnal', '=', $konsepJurnal['id'])->get();
+            $query = Akun::where('id_perusahaan', '=', $perusahaan->id);
+            $filter = $request->filter;
+            if ($filter){
+                $query = $query->where(function ($query) use ($filter) {
+                    return $query
+                        ->where('nama', 'like', '%'.$filter.'%')
+                        ->orWhere('no', 'like', '%'.$filter.'%');
+                });
+            }
 
-    //         return Helper::responseSuccess([
-    //             'strukturJurnal' => $strukturJurnal,
-    //             'strukturJurnalDetail' => $strukturJurnalDetail,
-    //             'konsepJurnalDetail' => $konsepJurnalDetail,
-    //         ]);
-    //     } catch (Exception $ex){
-    //         return Helper::responseError($ex->getMessage());
-    //     }
-    // }
+            $totalRowCount = $query->count();
+            $models = $query->simplePaginate(30);
+            return Helper::responseList($models, $totalRowCount);
+        } catch (Exception $ex){
+            return Helper::responseError($ex->getMessage());
+        }
+    }
 }
