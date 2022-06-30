@@ -52,11 +52,17 @@ class PerusahaanController extends Controller
             $proyek->nama = $request->nama;
             $proyek->save();
 
+            // config
+            $configStrukturAkun = config('setupAwal.struktur_akun', []);
+            $configKonsepAkun = config('setupAwal.konsep_akun', []);
+            $configAkun = config('setupAwal.akun', []);
+            $configLabaRugiAkun = config('setupAwal.labarugi_akun', []);
+
             // struktur akun
             $strukturAkuns = [];
             $strukturAkunDetails = [];
-            for($i = 0; $i < count(SetupAwal::$struktur_akun); $i++){
-                $x = SetupAwal::$struktur_akun[$i];
+            for($i = 0; $i < count($configStrukturAkun); $i++){
+                $x = $configStrukturAkun[$i];
                 $strukturAkun = new StrukturAkun;
                 $strukturAkun->id_perusahaan = $model->id;
                 $strukturAkun->nama = $x['nama'];
@@ -79,11 +85,11 @@ class PerusahaanController extends Controller
             // konsep akun
             $konsepAkun = new KonsepAkun;
             $konsepAkun->id_perusahaan = $model->id;
-            $konsepAkun->levelmax = SetupAwal::$konsep_akun['levelmax'];
-            $konsepAkun->digitmax = SetupAwal::$konsep_akun['digitmax'];
+            $konsepAkun->levelmax = $configKonsepAkun['levelmax'];
+            $konsepAkun->digitmax = $configKonsepAkun['digitmax'];
             $konsepAkun->save();
-            for ($i = 0; $i < count(SetupAwal::$konsep_akun['detail']); $i++) {
-                $y = SetupAwal::$konsep_akun['detail'][$i];
+            for ($i = 0; $i < count($configKonsepAkun['detail']); $i++) {
+                $y = $configKonsepAkun['detail'][$i];
                 $konsepAkunDetail = new KonsepAkunDetail;
                 $konsepAkunDetail->id_konsep_akun = $konsepAkun->id;
                 $konsepAkunDetail->level = $y['level'];
@@ -92,8 +98,8 @@ class PerusahaanController extends Controller
             }
 
             // akun
-            for($i = 0; $i < count(SetupAwal::$akun); $i++){
-                $x = SetupAwal::$akun[$i];
+            for($i = 0; $i < count($configAkun); $i++){
+                $x = $configAkun[$i];
                 $strukturAkun = Helper::findObjectById($strukturAkuns, $x['id_struktur_akun'], 'nama');
                 if ($strukturAkun == null){
                     throw new Exception($x['id_struktur_akun'].' tidak ditemukan');
