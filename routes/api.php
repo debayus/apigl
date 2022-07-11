@@ -23,69 +23,77 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-// Route::get('/test', [AkunController::class, 'all']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::get('/profile', function(Request $request) {
-        return auth()->user();
-    });
+
+    Route::get('/profile', fn() => auth()->user());
 
     Route::post('/logout', [AuthController::class, 'logout']);
-
     Route::post('/perusahaan',[PerusahaanController::class, 'store']);
-
     Route::get('/user',[UserController::class, 'index']);
 
-    Route::get('/akun',[AkunController::class, 'index']);
-    Route::get('/akun/{id}',[AkunController::class, 'show']);
-    Route::post('/akun',[AkunController::class, 'store']);
-    Route::put('/akun/{id}',[AkunController::class, 'update']);
-    Route::delete('/akun/{id}',[AkunController::class, 'destroy']);
+    Route::prefix('/akun')->controller(AkunController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/','store');
+        Route::put('/{id}','update');
+        Route::delete('/{id}', 'destroy');
+    });
 
-    Route::get('/proyek',[ProyekController::class, 'index']);
-    Route::get('/proyek/{id}',[ProyekController::class, 'show']);
-    Route::post('/proyek',[ProyekController::class, 'store']);
-    Route::put('/proyek/{id}',[ProyekController::class, 'update']);
-    Route::delete('/proyek/{id}',[ProyekController::class, 'destroy']);
+    Route::prefix('/proyek')->controller(ProyekController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/','store');
+        Route::put('/{id}','update');
+        Route::delete('/{id}', 'destroy');
+    });
 
-    Route::get('/kontak',[KontakController::class, 'index']);
-    Route::get('/kontak/{id}',[KontakController::class, 'show']);
-    Route::post('/kontak',[KontakController::class, 'store']);
-    Route::put('/kontak/{id}',[KontakController::class, 'update']);
-    Route::delete('/kontak/{id}',[KontakController::class, 'destroy']);
+    Route::prefix('/kontak')->controller(KontakController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/','store');
+        Route::put('/{id}','update');
+        Route::delete('/{id}', 'destroy');
+    });
 
-    Route::get('/strukturAkun',[StrukturAkunController::class, 'index']);
-    Route::get('/strukturAkun/{id}',[StrukturAkunController::class, 'show']);
-    Route::post('/strukturAkun',[StrukturAkunController::class, 'store']);
-    Route::put('/strukturAkun/{id}',[StrukturAkunController::class, 'update']);
-    Route::delete('/strukturAkun/{id}',[StrukturAkunController::class, 'destroy']);
+    Route::prefix('/strukturAkun')->controller(StrukturAkunController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/','store');
+        Route::put('/{id}','update');
+        Route::delete('/{id}', 'destroy');
+    });
 
-    Route::get('/konsepAkun',[KonsepAkunController::class, 'index']);
-    Route::get('/konsepAkun/{id}',[KonsepAkunController::class, 'show']);
-    Route::post('/konsepAkun',[KonsepAkunController::class, 'store']);
-    Route::put('/konsepAkun/{id}',[KonsepAkunController::class, 'update']);
-    Route::delete('/konsepAkun/{id}',[KonsepAkunController::class, 'destroy']);
+    Route::prefix('/konsepAkun')->controller(KonsepAkunController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/','store');
+        Route::put('/{id}','update');
+        Route::delete('/{id}', 'destroy');
+    });
 
-    Route::get('/akun',[AkunController::class, 'index']);
-    Route::get('/akun/{id}',[AkunController::class, 'show']);
-    Route::post('/akun',[AkunController::class, 'store']);
-    Route::put('/akun/{id}',[AkunController::class, 'update']);
-    Route::delete('/akun/{id}',[AkunController::class, 'destroy']);
+    Route::prefix('/akun')->controller(AkunController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/','store');
+        Route::put('/{id}','update');
+        Route::delete('/{id}', 'destroy');
+    });
+
     Route::get('/akunMaster',[AkunController::class, 'master']);
     Route::get('/akunAll',[AkunController::class, 'all']);
     Route::get('/akunNew/{id}',[AkunController::class, 'new']);
 
-    Route::get('/jurnal',[JurnalController::class, 'index']);
-    Route::get('/jurnal/{id}',[JurnalController::class, 'show']);
-    Route::post('/jurnal',[JurnalController::class, 'store']);
-    Route::put('/jurnal/{id}',[JurnalController::class, 'update']);
-    Route::delete('/jurnal/{id}',[JurnalController::class, 'destroy']);
+    Route::prefix('/jurnal')->controller(JurnalController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/','store');
+        Route::put('/{id}','update');
+        Route::delete('/{id}', 'destroy');
+    });
+
     Route::get('/jurnalMaster',[JurnalController::class, 'master']);
     Route::get('/jurnalLookUpAkun',[JurnalController::class, 'lookupAkun']);
 });
