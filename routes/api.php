@@ -8,6 +8,7 @@ use App\Http\Controllers\KontakController;
 use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\StrukturAkunController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -98,4 +99,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/jurnalLookUpAkun',[JurnalController::class, 'lookupAkun']);
 });
 
+Route::prefix('/test')->controller(TestController::class)->group(function () {
+    // Route::get('/add', 'add');
 
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/','store');
+    Route::put('/{id}','update');
+    Route::delete('/{id}', 'destroy');
+});

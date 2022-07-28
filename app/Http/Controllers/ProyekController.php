@@ -21,7 +21,7 @@ class ProyekController extends Controller
             if (empty($perusahaan)) return Helper::responseErrorNoPerusahaan();
 
             $query = Proyek::where('id_perusahaan', '=', $perusahaan->id);
-            if ($request->filter){
+            if (isset($request->filter)){
                 $query = $query->where('nama', 'like', '%'.$request->filter.'%');
             }
             $totalRowCount = $query->count();
